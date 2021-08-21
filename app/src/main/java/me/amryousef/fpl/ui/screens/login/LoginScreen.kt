@@ -1,18 +1,18 @@
-package me.amryousef.fpl.ui.screens
+package me.amryousef.fpl.ui.screens.login
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Icon
-import androidx.compose.material.IconToggleButton
-import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.SaverScope
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,50 +22,22 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
+import me.amryousef.fpl.LocalServiceProvider
+import me.amryousef.fpl.data.LoginService
 import me.amryousef.fpl.ui.theme.FPLTheme
-import java.io.Serializable
-
-data class LoginStateData(
-    val email: String,
-    val password: String,
-    val isPasswordVisible: Boolean
-) : Serializable
-
-class LoginStateStore(
-    initialValue: LoginStateData? = null
-) {
-    val state = mutableStateOf(
-        initialValue ?: LoginStateData("", "", false)
-    )
-
-    fun onEmailChanged(newEmail: String) {
-        state.value = state.value.copy(email = newEmail)
-    }
-
-    fun onPasswordChanged(newPassword: String) {
-        state.value = state.value.copy(password = newPassword)
-    }
-
-    fun onPasswordVisibilityToggled() {
-        state.value = state.value.copy(isPasswordVisible = !state.value.isPasswordVisible)
-    }
-}
-
-class LoginStateSaver : Saver<LoginStateStore, Serializable> {
-    override fun restore(value: Serializable): LoginStateStore? {
-        return (value as? LoginStateData)?.let { LoginStateStore(it) }
-    }
-
-    override fun SaverScope.save(value: LoginStateStore): Serializable {
-        return value.state.value
-    }
-}
 
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier
 ) {
-    val stateStore = rememberSaveable(saver = LoginStateSaver()) { LoginStateStore() }
+    val loginService = useLoginService()
+    val scope = rememberCoroutineScope()
+    val stateStore = rememberSaveable(
+        saver = LoginStateSaver(loginService)
+    ) {
+        LoginStateStore(loginService = loginService)
+    }
     val state by stateStore.state
     Column(
         modifier = modifier,
@@ -73,6 +45,7 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         OutlinedTextField(
+            enabled = !state.isSubmitting,
             value = state.email,
             onValueChange = {
                 stateStore.onEmailChanged(it)
@@ -80,6 +53,7 @@ fun LoginScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
         )
         OutlinedTextField(
+            enabled = !state.isSubmitting,
             value = state.password,
             onValueChange = {
                 stateStore.onPasswordChanged(it)
@@ -102,6 +76,18 @@ fun LoginScreen(
                 }
             }
         )
+        Row {
+            Button(
+                onClick = {
+                    scope.launch {
+                        stateStore.doLogin()
+                    }
+                },
+                enabled = !state.isSubmitting
+            ) {
+                Text(text = "Login")
+            }
+        }
     }
 }
 

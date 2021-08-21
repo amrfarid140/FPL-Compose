@@ -4,25 +4,32 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import me.amryousef.fpl.ui.screens.LoginScreen
+import me.amryousef.fpl.ui.screens.login.LoginScreen
 import me.amryousef.fpl.ui.theme.FPLTheme
+
+val LocalServiceProvider = staticCompositionLocalOf {
+    ServiceLoader()
+}
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            FPLTheme {
-                Scaffold {
-                    LoginScreen(
-                        modifier = Modifier.fillMaxSize()
-                    )
+            CompositionLocalProvider(
+                LocalServiceProvider.provides(
+                    ServiceLoader(application)
+                )
+            ) {
+                FPLTheme {
+                    Scaffold {
+                        LoginScreen(
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 }
             }
         }
