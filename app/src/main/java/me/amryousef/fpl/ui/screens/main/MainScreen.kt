@@ -7,9 +7,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
@@ -17,47 +14,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import me.amryousef.fpl.LocalServiceProvider
 import me.amryousef.fpl.ServiceLoader
-import me.amryousef.fpl.data.LoginService
 import me.amryousef.fpl.ui.screens.login.LoginScreen
 import me.amryousef.fpl.ui.theme.FPLTheme
-import java.io.Serializable
-
-class AppStateSaver(
-    private val loginService: LoginService
-) : Saver<AppStateStore, Serializable> {
-    override fun restore(value: Serializable): AppStateStore {
-        return AppStateStore(
-            initialState = value as? AppState,
-            loginService = loginService
-        )
-    }
-
-    override fun SaverScope.save(value: AppStateStore): Serializable {
-        return value.state.value
-    }
-}
-
-data class AppState(
-    val isLoggedIn: Boolean
-) : Serializable
-
-class AppStateStore(
-    initialState: AppState? = null,
-    loginService: LoginService
-) {
-
-    constructor(loginService: LoginService) : this(null, loginService)
-
-    val state = mutableStateOf(
-        initialState ?: AppState(
-            isLoggedIn = loginService.isLoggedIn()
-        )
-    )
-
-    fun onLoginComplete() {
-        state.value = state.value.copy(isLoggedIn = true)
-    }
-}
 
 @Composable
 fun MainScreen(
@@ -68,10 +26,7 @@ fun MainScreen(
             ServiceLoader(application)
         )
     ) {
-        val loginService = LocalServiceProvider.current.loginService
-        val stateStore = rememberSaveable(saver = AppStateSaver(loginService)) {
-            AppStateStore(loginService)
-        }
+        val stateStore = appContext()
         val navController = rememberNavController()
         FPLTheme {
             Scaffold(
