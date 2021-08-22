@@ -9,6 +9,8 @@ class LoginService(
         const val LOGIN_APP = "plfpl-web"
     }
 
+    fun isLoggedIn() = fplCookieJar.cookieList.isNotEmpty()
+
     suspend fun login(email: String, password: String): Result<Unit> {
         return try {
             api.login(

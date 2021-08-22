@@ -9,6 +9,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import me.amryousef.fpl.ui.screens.login.LoginScreen
+import me.amryousef.fpl.ui.screens.main.MainScreen
 import me.amryousef.fpl.ui.theme.FPLTheme
 
 val LocalServiceProvider = staticCompositionLocalOf {
@@ -19,19 +20,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            CompositionLocalProvider(
-                LocalServiceProvider.provides(
-                    ServiceLoader(application)
-                )
-            ) {
-                FPLTheme {
-                    Scaffold {
-                        LoginScreen(
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-                }
-            }
+            MainScreen(application)
         }
     }
 }

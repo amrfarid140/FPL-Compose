@@ -9,13 +9,15 @@ import me.amryousef.fpl.data.LoginService
 class LoginStateStore(
     initialValue: LoginState? = null,
     private val loginService: LoginService,
-    private val coroutineScope: CoroutineScope
+    private val coroutineScope: CoroutineScope,
+    private val onLoginComplete: () -> Unit
 ) {
 
     constructor(
         loginService: LoginService,
-        coroutineScope: CoroutineScope
-    ) : this(null, loginService, coroutineScope)
+        coroutineScope: CoroutineScope,
+        onLoginComplete: () -> Unit
+    ) : this(null, loginService, coroutineScope, onLoginComplete)
 
     val state = mutableStateOf(
         initialValue ?: LoginState(
@@ -54,6 +56,9 @@ class LoginStateStore(
                 isSubmitting = false,
                 shouldDisplayErrorAlert = result.isFailure
             )
+            if (result.isSuccess) {
+                onLoginComplete()
+            }
         }
     }
 }

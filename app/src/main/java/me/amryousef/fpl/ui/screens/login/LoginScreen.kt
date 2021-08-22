@@ -26,9 +26,10 @@ import me.amryousef.fpl.ui.theme.FPLTheme
 
 @Composable
 fun LoginScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onLoginComplete: () -> Unit
 ) {
-    val stateStore = loginContext()
+    val stateStore = loginContext(onLoginComplete)
     val state by stateStore.state
     Column(
         modifier = modifier,
@@ -111,7 +112,8 @@ fun LoginScreen(
 fun LoginPreview() {
     FPLTheme {
         LoginScreen(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            onLoginComplete = {}
         )
     }
 }

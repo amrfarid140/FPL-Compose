@@ -8,10 +8,13 @@ import java.io.Serializable
 
 class LoginStateSaver(
     private val loginService: LoginService,
-    private val coroutineScope: CoroutineScope
+    private val coroutineScope: CoroutineScope,
+    private val onLoginComplete: () -> Unit
 ) : Saver<LoginStateStore, Serializable> {
     override fun restore(value: Serializable): LoginStateStore? {
-        return (value as? LoginState)?.let { LoginStateStore(it, loginService, coroutineScope) }
+        return (value as? LoginState)?.let {
+            LoginStateStore(it, loginService, coroutineScope, onLoginComplete)
+        }
     }
 
     override fun SaverScope.save(value: LoginStateStore): Serializable {
