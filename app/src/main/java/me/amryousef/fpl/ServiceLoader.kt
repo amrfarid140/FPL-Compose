@@ -4,7 +4,7 @@ import android.app.Application
 import android.content.Context
 import me.amryousef.fpl.data.FplLoginAPI
 import me.amryousef.fpl.data.LoginService
-import me.amryousef.fpl.data.MyCookieJar
+import me.amryousef.fpl.data.FplCookieJar
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -24,7 +24,7 @@ class ServiceLoader(
     }
 
     private val cookieJar by lazy {
-        MyCookieJar(
+        FplCookieJar(
             cookiesSharedPref
         )
     }
@@ -56,7 +56,8 @@ class ServiceLoader(
 
     val loginService by lazy {
         LoginService(
-            loginRetrofit.create(FplLoginAPI::class.java)
+            loginRetrofit.create(FplLoginAPI::class.java),
+            cookieJar
         )
     }
 }

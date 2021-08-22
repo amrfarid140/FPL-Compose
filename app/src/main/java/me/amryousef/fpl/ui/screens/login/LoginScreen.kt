@@ -1,9 +1,6 @@
 package me.amryousef.fpl.ui.screens.login
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -31,13 +28,7 @@ import me.amryousef.fpl.ui.theme.FPLTheme
 fun LoginScreen(
     modifier: Modifier = Modifier
 ) {
-    val loginService = useLoginService()
-    val scope = rememberCoroutineScope()
-    val stateStore = rememberSaveable(
-        saver = LoginStateSaver(loginService)
-    ) {
-        LoginStateStore(loginService = loginService)
-    }
+    val stateStore = loginContext()
     val state by stateStore.state
     Column(
         modifier = modifier,
@@ -45,6 +36,8 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         OutlinedTextField(
+            placeholder = { Text("Email") },
+            label = { Text("Email") },
             enabled = !state.isSubmitting,
             value = state.email,
             onValueChange = {
@@ -53,6 +46,8 @@ fun LoginScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
         )
         OutlinedTextField(
+            placeholder = { Text("Password") },
+            label = { Text("Password") },
             enabled = !state.isSubmitting,
             value = state.password,
             onValueChange = {
@@ -78,16 +73,36 @@ fun LoginScreen(
         )
         Row {
             Button(
-                onClick = {
-                    scope.launch {
-                        stateStore.doLogin()
-                    }
-                },
+                onClick = { stateStore.doLogin() },
                 enabled = !state.isSubmitting
             ) {
                 Text(text = "Login")
             }
         }
+    }
+    if (state.shouldDisplayErrorAlert) {
+        AlertDialog(
+            onDismissRequest = { stateStore.onErrorAlertDismissed() },
+            title = { Text("Login Error") },
+            text = {
+                Text(
+                    text = "There was an error logging in. Check your email and password then try again."
+                )
+            },
+            buttons = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(4.dp),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(onClick = { stateStore.onErrorAlertDismissed() }) {
+                        Text(text = "OK")
+                    }
+                }
+            }
+        )
     }
 }
 

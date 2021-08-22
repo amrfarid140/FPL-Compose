@@ -6,5 +6,6 @@ data class LoginState(
     val email: String,
     val password: String,
     val isPasswordVisible: Boolean,
-    val isSubmitting: Boolean
+    val isSubmitting: Boolean,
+    val shouldDisplayErrorAlert: Boolean
 ) : Serializable

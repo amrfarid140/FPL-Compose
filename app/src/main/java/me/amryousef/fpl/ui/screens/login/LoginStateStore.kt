@@ -1,21 +1,29 @@
 package me.amryousef.fpl.ui.screens.login
 
 import androidx.compose.runtime.mutableStateOf
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 import me.amryousef.fpl.data.LoginService
 
 class LoginStateStore(
     initialValue: LoginState? = null,
-    private val loginService: LoginService
+    private val loginService: LoginService,
+    private val coroutineScope: CoroutineScope
 ) {
+
+    constructor(
+        loginService: LoginService,
+        coroutineScope: CoroutineScope
+    ) : this(null, loginService, coroutineScope)
+
     val state = mutableStateOf(
-        initialValue ?:
-        LoginState(
+        initialValue ?: LoginState(
             email = "",
             password = "",
             isPasswordVisible = false,
-            isSubmitting = false
+            isSubmitting = false,
+            shouldDisplayErrorAlert = false
         )
     )
 
@@ -31,18 +39,21 @@ class LoginStateStore(
         state.value = state.value.copy(isPasswordVisible = !state.value.isPasswordVisible)
     }
 
-    suspend fun doLogin() {
+    fun onErrorAlertDismissed() {
+        state.value = state.value.copy(shouldDisplayErrorAlert = !state.value.shouldDisplayErrorAlert)
+    }
+
+    fun doLogin() {
         state.value = state.value.copy(isSubmitting = true)
-        withContext(Dispatchers.IO) {
-            try {
-                loginService.login(
-                    email = state.value.email,
-                    password = state.value.password
-                )
-                state.value = state.value.copy(isSubmitting = false)
-            } catch (exception: Exception) {
-                state.value = state.value.copy(isSubmitting = false)
-            }
+        coroutineScope.launch(Dispatchers.IO) {
+            val result = loginService.login(
+                email = state.value.email,
+                password = state.value.password
+            )
+            state.value = state.value.copy(
+                isSubmitting = false,
+                shouldDisplayErrorAlert = result.isFailure
+            )
         }
     }
 }
